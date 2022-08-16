@@ -1,0 +1,84 @@
+Analisís de base ciencia de datos:
+1- Con la libreria pandas se importó la base de datos a trabajar
+base = pd.read_csv(r'C:\Users\u190850\Desktop\Python\Bases\datasets\Ciencia de datos\Base_DC_G6.csv', sep = ';')
+
+2- Se eliminaron variables que estan fuertemente correlacionadas con la variable objetivo (variables de mora)
+base = base.drop(columns=['GYM_VISA','GYM_CORDOBESA','GYM_PMOS_PERSONALES','MORA_ACTUAL_PH','MORA_ACTUAL_PRESTAMOS_PERSONALES','MORA_ACTUAL_TARJETA_CORDOBESA','MORA_ACTUAL_TARJETA_MASTERCARD','MORA_ACTUAL_TARJETA_VISA'])
+
+3-Se analizó las caracteristicas principales del dataset con las instriccuiones:
+	base.info()
+	base.describe()
+
+4- Analizamos valores faltantes para las variables:
+	a) Las variables con valores ausentes son : mob_cliente_meses tiene 26 valores ausentes, ANTIGUEDAD_TC tiene 3242 valores ausentes y ANTIGUEDAD_VS tiene 78939 valores ausentes
+	b) Para el caso de mob_cliente_meses y ANTIGUEDAD_TC, como el porcentaje de valores ausentes es bajo (menor al 5%) se tomo la decisión de reemplazar los NaN por el valor -1
+		base['mob_cliente_meses'] = base['mob_cliente_meses'].replace(np.nan, -1)
+		base['ANTIGUEDAD_TC'] = base['ANTIGUEDAD_TC'].replace(np.nan, -1)
+	c) En el caso de ANTIGUEDAD_VS, ya que tiene una gran cantidad de valores NaN la eliminamos del dataset
+		base = base.drop(columns=['ANTIGUEDAD_VS'])
+
+5- Analizamos los valores atipicos de las variables del dataset ( aca deberiamos ver que quieren hacer)
+	a) Definimos el valor Z maximo = 3 para identificar los valores atipicos, todos aquellos datos que tengan Z >= 3  seran considerados outlier
+	b) Analizamos graficamente el comportamiento de los valores a traves del boxplot 
+
+6- Para analizar el comportamiento de las variables numericas se realizaron los siguientes graficos:
+	a) Scatterplot de la distribucion de las variables en comparacion con la variable antiguedad_producto
+	b) Histogramas para ver como es el comportamiento de los valores en cada una de las variables 
+
+-----------------------------------------------------------------------------------------------------------------
+
+Analisis de correlacion de variables 
+
+Análisis de Correlación Pearson
+Hipotesis Nula: No existe relación lineal entre las variables Significancia: ??= 0.05
+Si p< a : "Existe relación lineal entre las variables, Rechazamos la hipotesis nula
+Si p>= a "Asumiremos que no existe relación lineal entre las variables 
+
+7- Analizamos la correlacion lineal de las variables con respecto a la variable objetivo 
+
+8-Analizamos la correlación de las variables a traves de la matriz de correlación 
+
+9- Calculamos el IV y WOE de las variables, para ver cuales son las que vamos a eliminar por correlación
+
+10- Eliminamos las variables que tengan una correlación superior a 0.65 basandonos en el IV
+
+	sincorrelacion = numbase.drop(columns=['VISA_MONTO_SALDO_RESUMEN','ANTIGUEDAD_TC','ANTIGUEDAD_CORDOBESA','CORDOBESA_MONTO_SALDO_TOTAL','CORDOBESA_MONTO_SALDO_RESUMEN','ANTIGUEDAD_PRESTAMOS_PERSONALES','TASA_PMOS_PERSONALES','SALDO_PP_CAP_ORIGINAL_HISTORICO','SALDO_PP_CAP_ORIGINAL','CANT_REFINANCIACION_VIGENTES', 'SALDO_PR_CAP_ORIGINAL','RATIO_PLAZOFIJO_PESOS_3M_6M','TRANSACCIONES_POR_ATM_LINK_CANT','peor_sit_bancor_6meses','peor_sit_no_bancor_3meses','SITUACION_NO_BANCOR2'])
+ 
+11- Vemos el HUE de las variables numericas, en comparación con la variable TARGET
+
+
+------------------------------------------------------------------------------------
+Construccion de modelos 
+
+12- Dividimos el dataset en TRAIN (70% de la base) y TEST (30% de la base) 
+
+13- Planteamos una regresion lineal como un primer modelo de aproximación 
+
+14- Calculamos el R2 score 
+	r2 socre is 0.23868500559611816
+	mean_sqrd_error is== 0.07760801017299061
+	root_mean_squared error of is== 0.27858214259530456
+Como podemos observar el poder predictivo del modelo es muy bajo, porlo que se deberia buscar otro modelo 
+
+15- Realizamos el Test F para ver si las varianzas de train y test son las mismas 
+
+	El estadístico de prueba F es 4,4968 
+	El p- value correspondiente es 1.1102230 e-16. 
+
+Dado que este valor p es menor que 0.05, rechazaríamos la hipótesis nula. Esto significa que tenemos suficiente evidencia para decir que las dos varianzas de población no son iguales.
+
+16- Realizamos una regresion logistica el cual nos arrojó los siguientes resultados 
+	
+
+	La precisión del modelo para Train es del : 93.52730985196528
+	La precisión del modelo para Test es del : 88.46276004446561
+
+          	precision    recall  f1-score   support
+
+           0       0.88      1.00      0.94     22286
+           1       0.33      0.00      0.00      2902
+
+    accuracy                           0.88     25188
+   macro avg       0.61      0.50      0.47     25188
+weighted avg       0.82      0.88      0.83     25188
+
